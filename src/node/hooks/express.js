@@ -17,6 +17,15 @@ let serverName;
 
 exports.server = null;
 
+const closeServer = async () => {
+  if (exports.server == null) return;
+  await Promise.all([
+    util.promisify(exports.server.close.bind(exports.server))(),
+    hooks.aCallAll('expressCloseServer'),
+  ]);
+  exports.server = null;
+};
+
 exports.createServer = async () => {
   console.log('Report bugs at https://github.com/ether/etherpad-lite/issues');
 
@@ -52,7 +61,7 @@ exports.createServer = async () => {
 exports.restartServer = async () => {
   if (exports.server) {
     console.log('Restarting express server');
-    await util.promisify(exports.server.close).bind(exports.server)();
+    await closeServer();
   }
 
   const app = express(); // New syntax for express v3
@@ -181,6 +190,5 @@ exports.restartServer = async () => {
 };
 
 exports.shutdown = async (hookName, context) => {
-  if (!exports.server) return;
-  await util.promisify(exports.server.close).bind(exports.server)();
+  await closeServer();
 };
