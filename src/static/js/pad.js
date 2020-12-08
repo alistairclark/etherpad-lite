@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-/* global $, window */
+'use strict';
 
 let socket;
 
