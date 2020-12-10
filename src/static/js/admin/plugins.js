@@ -1,16 +1,14 @@
 'use strict';
 
 $(document).ready(() => {
-  const loc = document.location;
-  const port = loc.port === '' ? (loc.protocol === 'https:' ? 443 : 80) : loc.port;
-  const url = `${loc.protocol}//${loc.hostname}:${port}/`;
-  const pathComponents = location.pathname.split('/');
-  // Strip admin/plugins
-  const baseURL = `${pathComponents.slice(0, pathComponents.length - 2).join('/')}/`;
-
-  // connect
-  const room = `${url}pluginfw/installer`;
-  const socket = io.connect(room, {path: `${baseURL}socket.io`});
+  // Get Etherpad's root path by stripping '/admin/plugins'.
+  const basePath = location.pathname.split('/').slice(0, -2).join('/');
+  // The io() function's API is awkward. The documentation says that the first argument is a URL,
+  // but it is not the URL of the socket.io endpoint. The URL's path part is used as the name of the
+  // socket.io namespace to join. To get the URL of the socket.io endpoint, replace the URL's path
+  // component with the `path` option (which defaults to '/socket.io', but is overridden here so
+  // that users can put Etherpad at something like '/etherpad').
+  const socket = io('/pluginfw/installer', {path: `${basePath}/socket.io`});
 
   const search = (searchTerm, limit) => {
     if (search.searchTerm !== searchTerm) {
